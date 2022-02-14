@@ -116,6 +116,11 @@ public class BookServiceImpl implements BookService {
                 map.put("statusMessage", "Buku Id Not Found");
                 return map;
             }
+            if (pemijamanBuku.getStatus() == config.statusPinjam){
+                map.put("statusCode", "404");
+                map.put("statusMessage", "Buku Sudah dipinjam");
+                return map;
+            }
             if (student == null){
                 map.put("statusCode", "404");
                 map.put("statusMessage", "Student Id Not Found");
