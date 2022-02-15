@@ -24,6 +24,9 @@ public class Buku implements Serializable {
     private String penulis;
     @Column(name = "penerbit", nullable = false, length = 100)
     private String penerbit;
+    @Setter
+    @Getter
+    private Integer jumlahBuku;
 
 //    @ManyToOne
 //    @JoinColumn(name = "id_staff", referencedColumnName = "id")

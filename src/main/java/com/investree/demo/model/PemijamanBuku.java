@@ -47,5 +47,8 @@ public class PemijamanBuku implements Serializable {
     @Column(name = "status", nullable = false, length = 50)
     private String status;
 
+    @Getter
+    @Setter
+    private Integer jumlahPinjam;
 
 }

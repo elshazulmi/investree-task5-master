@@ -65,6 +65,7 @@ public class BookServiceImpl implements BookService {
             Buku book = bukuRepository.getbyID(id);
             book.setNamaBuku(buku.getNamaBuku());
             book.setJenisBuku(buku.getJenisBuku());
+            book.setJumlahBuku(buku.getJumlahBuku());
             Buku doUpdate = bukuRepository.save(book);
             map.put("data", doUpdate);
             map.put("statusCode", 200);
@@ -111,14 +112,22 @@ public class BookServiceImpl implements BookService {
         try{
             Buku buku = bukuRepository.getbyID(id);
             Student student = studentRepository.getbyID(id);
+
             if(buku == null ){
                 map.put("statusCode", "404");
                 map.put("statusMessage", "Buku Id Not Found");
                 return map;
             }
-            if (pemijamanBuku.getStatus() == config.statusPinjam){
-                map.put("statusCode", "404");
-                map.put("statusMessage", "Buku Sudah dipinjam");
+            if(buku.getJumlahBuku() != null && buku.getJumlahBuku() <= 0 ){
+                map.put("statusCode", "501");
+                map.put("statusMessage", "Stok buku kosong");
+                return map;
+            }
+            int jmlbku = buku.getJumlahBuku();
+            int jmlPjm = pemijamanBuku.getJumlahPinjam();
+            if (jmlbku < jmlPjm){
+                map.put("statusCode", "501");
+                map.put("statusMessage", "Stok buku Kurang Dari Jumlah Yang diPinjam");
                 return map;
             }
             if (student == null){
@@ -126,11 +135,13 @@ public class BookServiceImpl implements BookService {
                 map.put("statusMessage", "Student Id Not Found");
                 return map;
             }
-
+            pemijamanBuku.setTglPeminjaman(new Date());
             pemijamanBuku.setStatus(config.statusPinjam);
             pemijamanBuku.setBuku(buku);
             pemijamanBuku.setStudent(student);
             PemijamanBuku obj = peminjamanRepository.save(pemijamanBuku);
+            buku.setJumlahBuku(jmlbku - jmlPjm);
+            bukuRepository.save(buku);
             map.put("data", obj);
             map.put("statusCode", "200");
             map.put("statusMessage", "Sukses");
@@ -149,6 +160,7 @@ public class BookServiceImpl implements BookService {
         Map map = new HashMap();
         try{
             PemijamanBuku pinjam = peminjamanRepository.getById(id_peminjaman);
+            Buku buku = bukuRepository.getbyID(pinjam.getBuku().getId());
             if(pinjam == null ){
                 map.put("statusCode", "404");
                 map.put("statusMessage", "Data id tidak ditemukan");
@@ -156,6 +168,9 @@ public class BookServiceImpl implements BookService {
             }
             pinjam.setTglPengembalian(new Date());
             pinjam.setStatus(config.statusKembali);
+            buku.setJumlahBuku(buku.getJumlahBuku() + pinjam.getJumlahPinjam());
+            bukuRepository.save(buku);
+            pinjam.setJumlahPinjam(pinjam.getJumlahPinjam()-pinjam.getJumlahPinjam());
             peminjamanRepository.save(pinjam);
 
             map.put("data", "sukses");
