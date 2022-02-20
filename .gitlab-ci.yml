@@ -49,3 +49,17 @@ deploy-job:      # This job runs in the deploy stage.
 #  only:
 #    refs:
 #      - master
+
+production:
+  image: ruby:2.4
+  stage: deploy
+  before_script:
+    - gem install dpl
+    - wget -qO- https://cli-assets.heroku.com/install-ubuntu.sh | sh
+  script:
+    - dpl --provider=heroku --app=investree-task5-master --api-key=204919b9-1592-4094-b1c9-1d351bf5f30c
+    - export HEROKU_API_KEY=204919b9-1592-4094-b1c9-1d351bf5f30c
+    - heroku run --app investree-task5-master migrate
+  environment:
+    name: production
+    url: https://investree-task5-master.herokuapp.com
